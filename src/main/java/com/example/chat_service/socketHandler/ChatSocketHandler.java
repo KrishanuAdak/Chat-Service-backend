@@ -8,16 +8,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
+import com.example.chat_service.service.MessageInfoService;
 import com.example.chat_service.dto.MessageRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 @Component 
 public class ChatSocketHandler extends TextWebSocketHandler {
     @Lazy 
     private final ObjectMapper objectMapper;
+    private final MessageInfoService messageInfoService;
     private final Map<Long, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    public ChatSocketHandler(ObjectMapper objectMapper) {
+    public ChatSocketHandler(ObjectMapper objectMapper, MessageInfoService messageInfoService) {
         this.objectMapper = objectMapper;
+        this.messageInfoService = messageInfoService;
     }
     @Override 
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -31,7 +33,14 @@ public class ChatSocketHandler extends TextWebSocketHandler {
         sessions.put(senderId, session);
         WebSocketSession receiverSession = sessions.get(receiverId);
         if (receiverSession != null && receiverSession.isOpen()) {
-            receiverSession.sendMessage(new TextMessage(message.getPayload()));
+            try{
+                receiverSession.sendMessage(new TextMessage(message.getPayload()));
+                messageInfoService.saveMessage(chatMessage);
+            }
+            catch(Exception e){
+                System.out.println("Error sending message to receiver session: " + e.getMessage());
+            }
+
         } else {
             System.out.println("Receiver session not found or closed for receiverId: " + receiverId);
         }

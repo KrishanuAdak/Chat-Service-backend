@@ -3,12 +3,15 @@ package com.example.chat_service.model;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "messages")
 public class MessageInfo {
+    @Id 
     private long id;
     private String messages;
     private long senderId;
@@ -18,6 +21,12 @@ public class MessageInfo {
         sendTime = LocalDateTime.now();
     }
     private LocalDateTime sendTime;
+
+    @PreUpdate 
+    private void preUpdate(){
+        updatedTime=LocalDateTime.now();
+    }
+    private LocalDateTime updatedTime;
 
     public long getId() {
         return id;

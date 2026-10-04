@@ -10,6 +10,8 @@ public class MessageRequest {
         this.senderId = senderId;
         this.receiverId = receiverId;
     }
+    public MessageRequest() {
+    }
 
     public String getMessage() {
         return message;
